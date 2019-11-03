@@ -12,25 +12,25 @@ extern "C" {
 #include "freertos/semphr.h"
 }
 
-class AsyncUDP;
-class AsyncUDPPacket;
-class AsyncUDPMessage;
+class AsyncUDP_big;
+class AsyncUDP_bigPacket;
+class AsyncUDP_bigMessage;
 struct udp_pcb;
 struct pbuf;
 struct netif;
 
-typedef std::function<void(AsyncUDPPacket& packet)> AuPacketHandlerFunction;
-typedef std::function<void(void * arg, AsyncUDPPacket& packet)> AuPacketHandlerFunctionWithArg;
+typedef std::function<void(AsyncUDP_bigPacket& packet)> AuPacketHandlerFunction;
+typedef std::function<void(void * arg, AsyncUDP_bigPacket& packet)> AuPacketHandlerFunctionWithArg;
 
-class AsyncUDPMessage : public Print
+class AsyncUDP_bigMessage : public Print
 {
 protected:
     uint8_t *_buffer;
     size_t _index;
     size_t _size;
 public:
-    AsyncUDPMessage(size_t size=CONFIG_TCP_MSS);
-    virtual ~AsyncUDPMessage();
+    AsyncUDP_bigMessage(size_t size=CONFIG_TCP_MSS);
+    virtual ~AsyncUDP_bigMessage();
     size_t write(const uint8_t *data, size_t len);
     size_t write(uint8_t data);
     size_t space();
@@ -43,10 +43,10 @@ public:
     }
 };
 
-class AsyncUDPPacket : public Stream
+class AsyncUDP_bigPacket : public Stream
 {
 protected:
-    AsyncUDP *_udp;
+    AsyncUDP_big *_udp;
     pbuf *_pb;
     tcpip_adapter_if_t _if;
     ip_addr_t _localIp;
@@ -58,8 +58,8 @@ protected:
     size_t _len;
     size_t _index;
 public:
-    AsyncUDPPacket(AsyncUDP *udp, pbuf *pb, const ip_addr_t *addr, uint16_t port, struct netif * netif);
-    virtual ~AsyncUDPPacket();
+    AsyncUDP_bigPacket(AsyncUDP_big *udp, pbuf *pb, const ip_addr_t *addr, uint16_t port, struct netif * netif);
+    virtual ~AsyncUDP_bigPacket();
 
     uint8_t * data();
     size_t length();
@@ -77,7 +77,7 @@ public:
     uint16_t remotePort();
     void remoteMac(uint8_t * mac);
 
-    size_t send(AsyncUDPMessage &message);
+    size_t send(AsyncUDP_bigMessage &message);
 
     int available();
     size_t read(uint8_t *data, size_t len);
@@ -89,7 +89,7 @@ public:
     size_t write(uint8_t data);
 };
 
-class AsyncUDP : public Print
+class AsyncUDP_big : public Print
 {
 protected:
     udp_pcb *_pcb;
@@ -101,8 +101,8 @@ protected:
     void _recv(udp_pcb *upcb, pbuf *pb, const ip_addr_t *addr, uint16_t port, struct netif * netif);
 
 public:
-    AsyncUDP();
-    virtual ~AsyncUDP();
+    AsyncUDP_big();
+    virtual ~AsyncUDP_big();
 
     void onPacket(AuPacketHandlerFunctionWithArg cb, void * arg=NULL);
     void onPacket(AuPacketHandlerFunction cb);
@@ -133,13 +133,13 @@ public:
     size_t broadcast(uint8_t *data, size_t len);
     size_t broadcast(const char * data);
 
-    size_t sendTo(AsyncUDPMessage &message, const ip_addr_t *addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
-    size_t sendTo(AsyncUDPMessage &message, const IPAddress addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
-    size_t sendTo(AsyncUDPMessage &message, const IPv6Address addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
-    size_t send(AsyncUDPMessage &message);
+    size_t sendTo(AsyncUDP_bigMessage &message, const ip_addr_t *addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
+    size_t sendTo(AsyncUDP_bigMessage &message, const IPAddress addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
+    size_t sendTo(AsyncUDP_bigMessage &message, const IPv6Address addr, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
+    size_t send(AsyncUDP_bigMessage &message);
 
-    size_t broadcastTo(AsyncUDPMessage &message, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
-    size_t broadcast(AsyncUDPMessage &message);
+    size_t broadcastTo(AsyncUDP_bigMessage &message, uint16_t port, tcpip_adapter_if_t tcpip_if=TCPIP_ADAPTER_IF_MAX);
+    size_t broadcast(AsyncUDP_bigMessage &message);
 
     IPAddress listenIP();
     IPv6Address listenIPv6();
