@@ -870,12 +870,12 @@ bool AsyncUDP_big::connected()
     return _connected;
 }
 
-void AsyncUDP_big::onPacket(AuPacketHandlerFunctionWithArg cb, void * arg)
+void AsyncUDP_big::onPacket(AuPacketHandlerFunctionBigWithArg cb, void * arg)
 {
     onPacket(std::bind(cb, arg, std::placeholders::_1));
 }
 
-void AsyncUDP_big::onPacket(AuPacketHandlerFunction cb)
+void AsyncUDP_big::onPacket(AuPacketHandlerFunctionBig cb)
 {
     _handler = cb;
 }

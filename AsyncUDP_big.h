@@ -19,8 +19,8 @@ struct udp_pcb;
 struct pbuf;
 struct netif;
 
-typedef std::function<void(AsyncUDP_bigPacket& packet)> AuPacketHandlerFunction;
-typedef std::function<void(void * arg, AsyncUDP_bigPacket& packet)> AuPacketHandlerFunctionWithArg;
+typedef std::function<void(AsyncUDP_bigPacket& packet)> AuPacketHandlerFunctionBig;
+typedef std::function<void(void * arg, AsyncUDP_bigPacket& packet)> AuPacketHandlerFunctionBigWithArg;
 
 class AsyncUDP_bigMessage : public Print
 {
@@ -95,7 +95,7 @@ protected:
     udp_pcb *_pcb;
     //xSemaphoreHandle _lock;
     bool _connected;
-    AuPacketHandlerFunction _handler;
+    AuPacketHandlerFunctionBig _handler;
 
     bool _init();
     void _recv(udp_pcb *upcb, pbuf *pb, const ip_addr_t *addr, uint16_t port, struct netif * netif);
@@ -104,8 +104,8 @@ public:
     AsyncUDP_big();
     virtual ~AsyncUDP_big();
 
-    void onPacket(AuPacketHandlerFunctionWithArg cb, void * arg=NULL);
-    void onPacket(AuPacketHandlerFunction cb);
+    void onPacket(AuPacketHandlerFunctionBigWithArg cb, void * arg=NULL);
+    void onPacket(AuPacketHandlerFunctionBig cb);
 
     bool listen(const ip_addr_t *addr, uint16_t port);
     bool listen(const IPAddress addr, uint16_t port);
