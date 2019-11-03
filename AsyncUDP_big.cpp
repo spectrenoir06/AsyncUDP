@@ -134,7 +134,7 @@ static void _udp_task(void *pvParameters){
                 free((void*)(e));
                 continue;
             }
-            AsyncUDP_big_big::_s_recv(e->arg, e->pcb, e->pb, e->addr, e->port, e->netif);
+            AsyncUDP_big::_s_recv(e->arg, e->pcb, e->pb, e->addr, e->port, e->netif);
             free((void*)(e));
         }
     }
@@ -218,7 +218,7 @@ static bool _udp_task_stop(){
 #define UDP_MUTEX_UNLOCK()  //xSemaphoreGive(_lock)
 
 
-AsyncUDP_big_bigMessage::AsyncUDP_big_bigMessage(size_t size)
+AsyncUDP_bigMessage::AsyncUDP_bigMessage(size_t size)
 {
     _index = 0;
     if(size > CONFIG_TCP_MSS) {
@@ -228,14 +228,14 @@ AsyncUDP_big_bigMessage::AsyncUDP_big_bigMessage(size_t size)
     _buffer = (uint8_t *)malloc(size);
 }
 
-AsyncUDP_big_bigMessage::~AsyncUDP_big_bigMessage()
+AsyncUDP_bigMessage::~AsyncUDP_bigMessage()
 {
     if(_buffer) {
         free(_buffer);
     }
 }
 
-size_t AsyncUDP_big_bigMessage::write(const uint8_t *data, size_t len)
+size_t AsyncUDP_bigMessage::write(const uint8_t *data, size_t len)
 {
     if(_buffer == NULL) {
         return 0;
@@ -249,12 +249,12 @@ size_t AsyncUDP_big_bigMessage::write(const uint8_t *data, size_t len)
     return len;
 }
 
-size_t AsyncUDP_big_bigMessage::write(uint8_t data)
+size_t AsyncUDP_bigMessage::write(uint8_t data)
 {
     return write(&data, 1);
 }
 
-size_t AsyncUDP_big_bigMessage::space()
+size_t AsyncUDP_bigMessage::space()
 {
     if(_buffer == NULL) {
         return 0;
@@ -262,23 +262,23 @@ size_t AsyncUDP_big_bigMessage::space()
     return _size - _index;
 }
 
-uint8_t * AsyncUDP_big_bigMessage::data()
+uint8_t * AsyncUDP_bigMessage::data()
 {
     return _buffer;
 }
 
-size_t AsyncUDP_big_bigMessage::length()
+size_t AsyncUDP_bigMessage::length()
 {
     return _index;
 }
 
-void AsyncUDP_big_bigMessage::flush()
+void AsyncUDP_bigMessage::flush()
 {
     _index = 0;
 }
 
 
-AsyncUDP_big_bigPacket::AsyncUDP_big_bigPacket(AsyncUDP_big_big *udp, pbuf *pb, const ip_addr_t *raddr, uint16_t rport, struct netif * ntif)
+AsyncUDP_bigPacket::AsyncUDP_bigPacket(AsyncUDP_big *udp, pbuf *pb, const ip_addr_t *raddr, uint16_t rport, struct netif * ntif)
 {
     _udp = udp;
     _pb = pb;
@@ -324,26 +324,26 @@ AsyncUDP_big_bigPacket::AsyncUDP_big_bigPacket(AsyncUDP_big_big *udp, pbuf *pb, 
     }
 }
 
-AsyncUDP_big_bigPacket::~AsyncUDP_big_bigPacket()
+AsyncUDP_bigPacket::~AsyncUDP_bigPacket()
 {
     pbuf_free(_pb);
 }
 
-uint8_t * AsyncUDP_big_bigPacket::data()
+uint8_t * AsyncUDP_bigPacket::data()
 {
     return _data;
 }
 
-size_t AsyncUDP_big_bigPacket::length()
+size_t AsyncUDP_bigPacket::length()
 {
     return _len;
 }
 
-int AsyncUDP_big_bigPacket::available(){
+int AsyncUDP_bigPacket::available(){
     return _len - _index;
 }
 
-size_t AsyncUDP_big_bigPacket::read(uint8_t *data, size_t len){
+size_t AsyncUDP_bigPacket::read(uint8_t *data, size_t len){
     size_t i;
     size_t a = _len - _index;
     if(len > a){
@@ -355,30 +355,30 @@ size_t AsyncUDP_big_bigPacket::read(uint8_t *data, size_t len){
     return len;
 }
 
-int AsyncUDP_big_bigPacket::read(){
+int AsyncUDP_bigPacket::read(){
     if(_index < _len){
         return _data[_index++];
     }
     return -1;
 }
 
-int AsyncUDP_big_bigPacket::peek(){
+int AsyncUDP_bigPacket::peek(){
     if(_index < _len){
         return _data[_index];
     }
     return -1;
 }
 
-void AsyncUDP_big_bigPacket::flush(){
+void AsyncUDP_bigPacket::flush(){
     _index = _len;
 }
 
-tcpip_adapter_if_t AsyncUDP_big_bigPacket::interface()
+tcpip_adapter_if_t AsyncUDP_bigPacket::interface()
 {
     return _if;
 }
 
-IPAddress AsyncUDP_big_bigPacket::localIP()
+IPAddress AsyncUDP_bigPacket::localIP()
 {
     if(_localIp.type != IPADDR_TYPE_V4){
         return IPAddress();
@@ -386,7 +386,7 @@ IPAddress AsyncUDP_big_bigPacket::localIP()
     return IPAddress(_localIp.u_addr.ip4.addr);
 }
 
-IPv6Address AsyncUDP_big_bigPacket::localIPv6()
+IPv6Address AsyncUDP_bigPacket::localIPv6()
 {
     if(_localIp.type != IPADDR_TYPE_V6){
         return IPv6Address();
@@ -394,12 +394,12 @@ IPv6Address AsyncUDP_big_bigPacket::localIPv6()
     return IPv6Address(_localIp.u_addr.ip6.addr);
 }
 
-uint16_t AsyncUDP_big_bigPacket::localPort()
+uint16_t AsyncUDP_bigPacket::localPort()
 {
     return _localPort;
 }
 
-IPAddress AsyncUDP_big_bigPacket::remoteIP()
+IPAddress AsyncUDP_bigPacket::remoteIP()
 {
     if(_remoteIp.type != IPADDR_TYPE_V4){
         return IPAddress();
@@ -407,7 +407,7 @@ IPAddress AsyncUDP_big_bigPacket::remoteIP()
     return IPAddress(_remoteIp.u_addr.ip4.addr);
 }
 
-IPv6Address AsyncUDP_big_bigPacket::remoteIPv6()
+IPv6Address AsyncUDP_bigPacket::remoteIPv6()
 {
     if(_remoteIp.type != IPADDR_TYPE_V6){
         return IPv6Address();
@@ -415,22 +415,22 @@ IPv6Address AsyncUDP_big_bigPacket::remoteIPv6()
     return IPv6Address(_remoteIp.u_addr.ip6.addr);
 }
 
-uint16_t AsyncUDP_big_bigPacket::remotePort()
+uint16_t AsyncUDP_bigPacket::remotePort()
 {
     return _remotePort;
 }
 
-void AsyncUDP_big_bigPacket::remoteMac(uint8_t * mac)
+void AsyncUDP_bigPacket::remoteMac(uint8_t * mac)
 {
     memcpy(mac, _remoteMac, 6);
 }
 
-bool AsyncUDP_big_bigPacket::isIPv6()
+bool AsyncUDP_bigPacket::isIPv6()
 {
     return _localIp.type == IPADDR_TYPE_V6;
 }
 
-bool AsyncUDP_big_bigPacket::isBroadcast()
+bool AsyncUDP_bigPacket::isBroadcast()
 {
     if(_localIp.type == IPADDR_TYPE_V6){
         return false;
@@ -439,12 +439,12 @@ bool AsyncUDP_big_bigPacket::isBroadcast()
     return ip == 0xFFFFFFFF || ip == 0 || (ip & 0xFF000000) == 0xFF000000;
 }
 
-bool AsyncUDP_big_bigPacket::isMulticast()
+bool AsyncUDP_bigPacket::isMulticast()
 {
     return ip_addr_ismulticast(&(_localIp));
 }
 
-size_t AsyncUDP_big_bigPacket::write(const uint8_t *data, size_t len)
+size_t AsyncUDP_bigPacket::write(const uint8_t *data, size_t len)
 {
     if(!data){
         return 0;
@@ -452,17 +452,17 @@ size_t AsyncUDP_big_bigPacket::write(const uint8_t *data, size_t len)
     return _udp->writeTo(data, len, &_remoteIp, _remotePort, _if);
 }
 
-size_t AsyncUDP_big_bigPacket::write(uint8_t data)
+size_t AsyncUDP_bigPacket::write(uint8_t data)
 {
     return write(&data, 1);
 }
 
-size_t AsyncUDP_big_bigPacket::send(AsyncUDP_big_bigMessage &message)
+size_t AsyncUDP_bigPacket::send(AsyncUDP_bigMessage &message)
 {
     return write(message.data(), message.length());
 }
 
-bool AsyncUDP_big_big::_init(){
+bool AsyncUDP_big::_init(){
     if(_pcb){
         return true;
     }
@@ -475,14 +475,14 @@ bool AsyncUDP_big_big::_init(){
     return true;
 }
 
-AsyncUDP_big_big::AsyncUDP_big_big()
+AsyncUDP_big::AsyncUDP_big()
 {
     _pcb = NULL;
     _connected = false;
     _handler = NULL;
 }
 
-AsyncUDP_big_big::~AsyncUDP_big_big()
+AsyncUDP_big::~AsyncUDP_big()
 {
     close();
     UDP_MUTEX_LOCK();
@@ -493,7 +493,7 @@ AsyncUDP_big_big::~AsyncUDP_big_big()
     //vSemaphoreDelete(_lock);
 }
 
-void AsyncUDP_big_big::close()
+void AsyncUDP_big::close()
 {
     UDP_MUTEX_LOCK();
     if(_pcb != NULL) {
@@ -506,7 +506,7 @@ void AsyncUDP_big_big::close()
     UDP_MUTEX_UNLOCK();
 }
 
-bool AsyncUDP_big_big::connect(const ip_addr_t *addr, uint16_t port)
+bool AsyncUDP_big::connect(const ip_addr_t *addr, uint16_t port)
 {
     if(!_udp_task_start()){
         log_e("failed to start task");
@@ -527,7 +527,7 @@ bool AsyncUDP_big_big::connect(const ip_addr_t *addr, uint16_t port)
     return true;
 }
 
-bool AsyncUDP_big_big::listen(const ip_addr_t *addr, uint16_t port)
+bool AsyncUDP_big::listen(const ip_addr_t *addr, uint16_t port)
 {
     if(!_udp_task_start()){
         log_e("failed to start task");
@@ -609,7 +609,7 @@ static esp_err_t joinMulticastGroup(const ip_addr_t *addr, bool join, tcpip_adap
     return ESP_OK;
 }
 
-bool AsyncUDP_big_big::listenMulticast(const ip_addr_t *addr, uint16_t port, uint8_t ttl, tcpip_adapter_if_t tcpip_if)
+bool AsyncUDP_big::listenMulticast(const ip_addr_t *addr, uint16_t port, uint8_t ttl, tcpip_adapter_if_t tcpip_if)
 {
     if(!ip_addr_ismulticast(addr)) {
         return false;
@@ -633,7 +633,7 @@ bool AsyncUDP_big_big::listenMulticast(const ip_addr_t *addr, uint16_t port, uin
     return true;
 }
 
-size_t AsyncUDP_big_big::writeTo(const uint8_t * data, size_t len, const ip_addr_t * addr, uint16_t port, tcpip_adapter_if_t tcpip_if)
+size_t AsyncUDP_big::writeTo(const uint8_t * data, size_t len, const ip_addr_t * addr, uint16_t port, tcpip_adapter_if_t tcpip_if)
 {
     if(!_pcb) {
         UDP_MUTEX_LOCK();
